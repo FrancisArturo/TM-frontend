@@ -1,9 +1,13 @@
-import { useState } from "react";
-// import { useNavigate } from "react-router-dom";
+import { useContext, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { AuthLayout } from "../../components/layouts/AuthLayout";
 import { Input } from "../../components/inputs/Input";
 import { Link } from "react-router-dom";
 import { validateEmail } from "../../utils/helper";
+import axiosInstance from "../../utils/axiosInstance";
+import { API_PATHS } from "../../utils/apiPaths";
+import { UserContext } from "../../context/userContext";
+import type { UserContextType } from "../../../types";
 
 
 
@@ -12,8 +16,9 @@ export const Login: React.FC = () => {
   const [email, setEmail] = useState("");
   const [ password, setPassword ] = useState("");
   const [ error, setError ] = useState<string | null>(null);
+  const { updateUser } = useContext(UserContext) as UserContextType;
 
-  // const navigate = useNavigate();
+  const navigate = useNavigate();
 
   //handle login form
   const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -30,6 +35,37 @@ export const Login: React.FC = () => {
     }
 
     setError("");
+
+    //Api call
+    try {
+      const response = await axiosInstance.post(API_PATHS.AUTH.LOGIN, {
+        email, 
+        password,
+      });
+
+      const { token, role } = response.data.user;
+
+      if( token ) {
+        localStorage.setItem("token", token);
+        updateUser(response.data.user);
+
+        //redirect based on role
+        if(role === "admin") {
+          navigate("/admin/dashboard");
+        } else {
+          console.log('first')
+          navigate("/user/dashboard");
+        }
+      }
+    } catch (error) {
+      // if (error.response && error.response.data.message) {
+      //   setError(error.response.data.message);
+      if(error instanceof Error) {
+        return [error.message]
+      } else {
+        setError("Something went wrong. Please try again.")
+      }
+    }
   }
 
   //handle email input

@@ -1,9 +1,14 @@
-import { useState } from "react";
+import { useContext, useState } from "react";
 import { ProfilePhotoSelector } from "../../components/inputs/ProfilePhotoSelector";
 import { AuthLayout } from "../../components/layouts/AuthLayout";
 import { Input } from "../../components/inputs/Input";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { validateEmail } from "../../utils/helper";
+import { API_PATHS } from "../../utils/apiPaths";
+import axiosInstance from "../../utils/axiosInstance";
+import { UserContext } from "../../context/userContext";
+import type { UserContextType } from "../../../types";
+import uploadImage from "../../utils/uploadimage";
 
 export const SignUp: React.FC = () => {
 
@@ -12,11 +17,16 @@ export const SignUp: React.FC = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [adminInviteToken, setAdminInviteToken] = useState("");
+  const { updateUser } = useContext(UserContext) as UserContextType;
 
   const [error, setError] = useState<string | null>(null);
 
+  const navigate = useNavigate();
+
   const handleSignUp = async (e: React.FormEvent<HTMLFormElement>) => {
       e.preventDefault();
+
+      let profileImageUrl = '';
   
       if(!fullName) {
         setError("Please enter full name.");
@@ -33,6 +43,44 @@ export const SignUp: React.FC = () => {
       }
   
       setError("");
+
+      //Api call
+      try {
+        
+      if(profilePic) {
+        const { imageUrl } = await uploadImage(profilePic);
+        profileImageUrl = imageUrl || "";
+      }
+      const response = await axiosInstance.post(API_PATHS.AUTH.REGISTER, {
+        name: fullName,
+        email, 
+        password,
+        profileImageUrl,
+        adminInviteToken,
+      });
+
+      const { token, role } = response.data.user;
+
+      if (token) {
+        localStorage.setItem("token", token);
+        updateUser(response.data.user);
+
+        if(role === "admin") {
+          navigate("/admin/dashboard");
+        } else {
+          navigate("/user/dashboard");
+        }
+      }
+
+    } catch (error) {
+      // if (error.response && error.response.data.message) {
+      //   setError(error.response.data.message);
+      if(error instanceof Error) {
+        return [error.message]
+      } else {
+        setError("Something went wrong. Please try again.")
+      }
+    }
     }
 
 

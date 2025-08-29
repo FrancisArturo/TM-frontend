@@ -1,7 +1,9 @@
 import {
   BrowserRouter as Router,
   Routes,
-  Route 
+  Route, 
+  Outlet,
+  Navigate
 } from "react-router-dom"
 import { Login } from './pages/Auth/Login.tsx';
 import { SignUp } from './pages/Auth/SignUp.tsx';
@@ -13,12 +15,17 @@ import { ManageUsers } from './pages/Admin/ManageUsers.tsx';
 import { UserDashboard } from './pages/User/UserDashboard.tsx';
 import { MyTasks } from './pages/User/MyTasks.tsx';
 import { ViewTaskDetail } from './pages/User/ViewTaskDetail.tsx';
+import UserProvider from "./context/UserProvider.tsx";
+import { useContext } from "react";
+import { UserContext } from "./context/userContext.tsx";
+import type { UserContextType } from "../types";
 
 
 const App = () => {
 
 
   return(
+    <UserProvider>
     <div>
       <Router>
         <Routes>
@@ -41,12 +48,29 @@ const App = () => {
             <Route path='/user/my-tasks' element={<MyTasks />}/>
             <Route path='/user/task-detail/:id' element={<ViewTaskDetail />}/>
           </Route>
+
+          //default router
+          <Route path="/" element={<Root />} />
         </Routes>
 
       </Router>
 
     </div>
+    </UserProvider>
   )
 }
 
 export default App
+
+const Root = () => {
+  const { user, loading } = useContext(UserContext) as UserContextType;
+  
+  if(loading) return <Outlet />
+
+  if (!user) {
+    return <Navigate to="/login"/>
+  }
+
+  return user.role === "admin" ? <Navigate to="/admin/dashboard" /> : <Navigate to="/user/dashboard"/>;
+}
+
