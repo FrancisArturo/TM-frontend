@@ -8,7 +8,7 @@ import { API_PATHS } from "../../utils/apiPaths";
 import axiosInstance from "../../utils/axiosInstance";
 import { UserContext } from "../../context/userContext";
 import type { UserContextType } from "../../../types";
-import uploadImage from "../../utils/uploadimage";
+import uploadImage from "../../utils/uploadImage";
 
 export const SignUp: React.FC = () => {
 

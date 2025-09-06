@@ -1,7 +1,7 @@
 
 interface Props {
-    children: React.ReactNode
-}
+    children: React.ReactNode;
+};
 
 export const AuthLayout:React.FC<Props> = ( {children}) => {
     return (
@@ -15,5 +15,5 @@ export const AuthLayout:React.FC<Props> = ( {children}) => {
 
             </div>
         </div>
-    )
-}
+    );
+};
