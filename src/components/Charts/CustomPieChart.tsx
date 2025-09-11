@@ -1,8 +1,10 @@
 import { Cell, Legend, Pie, PieChart, ResponsiveContainer, Tooltip } from "recharts"
+import { CustomTooltip } from "./CustomTooltip";
+import { CustomLegend } from "./CustomLegend";
 
 interface Props {
-    data:{status: string, count: number}[] | [],
-    colors: string[],
+    data:{status: string, count: number}[] | [];
+    colors: string[];
 }
 
 
@@ -24,9 +26,9 @@ export const CustomPieChart:React.FC<Props> = ({ data, colors }) => {
                         <Cell key={`cell-${index}`} fill={colors[index % colors.length]} />
                     ))}
                 </Pie>
-                <Tooltip />
-                <Legend />
+                <Tooltip content={<CustomTooltip active={false} payload={[]} />}/>
+                <Legend content={<CustomLegend payload={[]} />}/>
             </PieChart>
         </ResponsiveContainer>
-    )
-}
+    );
+};
